@@ -1,0 +1,207 @@
+/* ==================================================================
+   拾图 · PixHarvest — 注入到页面的悬浮按钮样式（Shadow DOM 内部）
+   仅作用于 shadow root，不会污染宿主页面；页面样式也进不来。
+   ================================================================== */
+
+:host {
+  all: initial;
+  font-family: "Segoe UI Variable", "Segoe UI", "PingFang SC", "Microsoft YaHei",
+    system-ui, sans-serif;
+}
+
+.ph-fab,
+.ph-toast {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* ------------------------------- 按钮 ------------------------------- */
+
+.ph-fab {
+  position: fixed;
+  right: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 20px 12px 14px;
+  border: 1px solid rgba(196, 181, 253, 0.5);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, #312e81 0%, #6d28d9 52%, #7c3aed 100%);
+  color: #f5f3ff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 16px 34px rgba(49, 46, 129, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.09) inset;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+/* 按钮后方的柔光，让它在白色电商页面上也足够醒目 */
+.ph-fab::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.4), transparent 78%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ph-fab:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow:
+    0 22px 44px rgba(91, 33, 182, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+}
+
+.ph-fab:hover::before {
+  opacity: 1;
+}
+
+.ph-fab:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ph-fab:focus-visible {
+  outline: 2px solid #a5f3fc;
+  outline-offset: 3px;
+}
+
+.ph-fab:disabled {
+  cursor: progress;
+  filter: saturate(0.75);
+}
+
+.ph-fab__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ph-fab__icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ph-fab__spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  animation: ph-spin 0.7s linear infinite;
+}
+
+.ph-fab.is-busy .ph-fab__icon {
+  display: none;
+}
+
+.ph-fab.is-busy .ph-fab__spinner {
+  display: inline-block;
+}
+
+@keyframes ph-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------- 提示 ------------------------------- */
+
+.ph-toast {
+  position: fixed;
+  right: 28px;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  z-index: 2147483647;
+  max-width: min(340px, calc(100vw - 56px));
+  margin: 0;
+  padding: 11px 15px;
+  border: 1px solid rgba(221, 214, 254, 0.3);
+  border-radius: 13px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.38);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ph-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ph-toast[data-tone="ok"] {
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.ph-toast[data-tone="warn"] {
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.ph-toast[data-tone="error"] {
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+/* ------------------------------ 小屏幕 ------------------------------ */
+
+@media (max-width: 640px) {
+  .ph-fab {
+    right: 14px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: 11px 16px 11px 12px;
+    font-size: 13px;
+  }
+
+  .ph-toast {
+    right: 14px;
+    left: 14px;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-fab,
+  .ph-toast,
+  .ph-fab::before {
+    transition: none;
+  }
+
+  .ph-fab__spinner {
+    animation-duration: 1.4s;
+  }
+}
+
+@media print {
+  .ph-fab,
+  .ph-toast {
+    display: none !important;
+  }
+}
